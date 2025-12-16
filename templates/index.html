@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Shelten's AI Avatar</title>
+<style>
+/* ---- GLOBAL STYLES ---- */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding: 0;
+    margin: 0;
+    background: linear-gradient(135deg, #1f1c2c, #928dab);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    color: #fff;
+}
+
+.container {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    border-radius: 25px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    width: 90%;
+    max-width: 800px;
+    padding: 30px;
+    text-align: center;
+    animation: fadeIn 1s ease-in-out;
+}
+
+/* ---- AVATAR ---- */
+#avatar {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    border: 4px solid #fff;
+    box-shadow: 0 0 30px #fff, 0 0 60px #ff00ff, 0 0 90px #00ffff;
+    margin-bottom: 20px;
+    transition: transform 0.3s ease;
+}
+#avatar:hover {
+    transform: scale(1.1) rotate(5deg);
+}
+
+/* ---- CHAT BOX ---- */
+#chat {
+    border-radius: 20px;
+    height: 280px;
+    overflow-y: auto;
+    padding: 20px;
+    margin: 20px auto;
+    background: rgba(0,0,0,0.2);
+    box-shadow: inset 0 0 10px rgba(255,255,255,0.2);
+    scroll-behavior: smooth;
+}
+
+.message {
+    margin: 10px 0;
+    padding: 10px 15px;
+    border-radius: 20px;
+    display: inline-block;
+    max-width: 80%;
+    word-wrap: break-word;
+    animation: fadeInMessage 0.5s ease;
+}
+.user {
+    background: linear-gradient(135deg, #00c6ff, #0072ff);
+    color: #fff;
+    align-self: flex-end;
+    text-align: right;
+}
+.ai {
+    background: linear-gradient(135deg, #ffeb3b, #ff9800);
+    color: #000;
+    align-self: flex-start;
+    text-align: left;
+}
+
+/* ---- SUGGESTIONS ---- */
+#suggestions {
+    margin: 10px 0;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+#suggestions button {
+    background: linear-gradient(135deg, #ff00ff, #00ffff);
+    border: none;
+    border-radius: 20px;
+    color: #fff;
+    padding: 8px 15px;
+    margin: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+#suggestions button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+}
+
+/* ---- INPUT ---- */
+#input-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+input[type=text] {
+    width: 70%;
+    padding: 10px;
+    border-radius: 25px 0 0 25px;
+    border: none;
+    outline: none;
+    font-size: 16px;
+}
+button.send {
+    padding: 10px 20px;
+    border-radius: 0 25px 25px 0;
+    border: none;
+    background: linear-gradient(135deg, #00ff88, #00cfff);
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+button.send:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+}
+
+/* ---- ANIMATIONS ---- */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-50px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeInMessage {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>Shelten's AI Avatar</h1>
+    <img id="avatar" src="{{ url_for('static', filename='avatar.jpg') }}" alt="Shelten Avatar">
+
+    <div id="chat"></div>
+
+<div id="suggestions">
+    <button onclick="sendQuestion('Hi')">👋 Hi</button>
+    <button onclick="sendQuestion('Who are you?')">🤖 Who are you?</button>
+    <button onclick="sendQuestion('What are your skills?')">💡 Skills</button>
+    <button onclick="sendQuestion('Tell me about your projects')">📂 Projects</button>
+    <button onclick="sendQuestion('What technologies do you know?')">🛠 Technologies</button>
+    <button onclick="sendQuestion('What is your goal?')">🎯 Goal</button>
+    <button onclick="sendQuestion('Are you a student or professional?')">🎓 Student?</button>
+    <button onclick="sendQuestion('What is your favorite programming language?')">💻 Favorite Language</button>
+    <button onclick="sendQuestion('Can you help me learn programming?')">📘 Learn Programming</button>
+    <button onclick="sendQuestion('What can you do?')">⚙️ What can you do?</button>
+</div>
+
+
+    <div id="input-container">
+        <input type="text" id="user-input" placeholder="Type your question...">
+        <button class="send" onclick="sendQuestion()">Send</button>
+    </div>
+</div>
+
+<script>
+const chat = document.getElementById("chat");
+const userInput = document.getElementById("user-input");
+let voices = [];
+function loadVoices() { voices = speechSynthesis.getVoices(); }
+speechSynthesis.onvoiceschanged = loadVoices;
+loadVoices();
+
+function appendMessage(sender, text) {
+    const div = document.createElement("div");
+    div.classList.add("message", sender);
+    div.textContent = `${sender === 'user' ? 'You' : 'AI Me'}: ${text}`;
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+}
+
+function speak(text) {
+    if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-US';
+        utterance.pitch = 1;
+        utterance.rate = 1;
+        let maleVoice = voices.find(v =>
+            v.name.toLowerCase().includes('david') ||
+            v.name.toLowerCase().includes('mark') ||
+            v.name.toLowerCase().includes('alex')
+        );
+        if (maleVoice) utterance.voice = maleVoice;
+        speechSynthesis.speak(utterance);
+    }
+}
+
+function sendQuestion(questionText) {
+    const message = questionText || userInput.value;
+    if (!message) return;
+    appendMessage('user', message);
+    userInput.value = '';
+    fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message })
+    })
+    .then(res => res.json())
+    .then(data => {
+        appendMessage('ai', data.reply);
+        speak(data.reply);
+    })
+    .catch(err => {
+        const fallback = "AI is temporarily unavailable. Please try again.";
+        appendMessage('ai', fallback);
+        speak(fallback);
+    });
+}
+
+userInput.addEventListener("keydown", function(e){
+    if(e.key === "Enter"){ sendQuestion(); }
+});
+</script>
+
+</body>
+</html>

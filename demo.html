@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Smart Offline Chatbot</title>
+  <style>
+    body { font-family: Arial; padding: 20px; background: #f5f5f5; }
+    #chat { border: 1px solid #ccc; padding: 10px; width: 450px; height: 350px; overflow-y: auto; background: #fff; border-radius: 8px; }
+    input { width: 300px; padding: 8px; border-radius: 5px; border: 1px solid #ccc; }
+    button { padding: 8px 12px; border-radius: 5px; border: none; background: #4CAF50; color: white; cursor: pointer; }
+    button:hover { background: #45a049; }
+    .user { color: #1a73e8; margin: 5px 0; }
+    .bot { color: #34a853; margin: 5px 0; }
+  </style>
+</head>
+<body>
+
+<h2>Smart Offline Chatbot</h2>
+<div id="chat"></div>
+<input id="msg" placeholder="Type your question">
+<button onclick="sendMessage()">Send</button>
+
+<script>
+  const chat = document.getElementById("chat");
+
+  function sendMessage() {
+    const userMsg = document.getElementById("msg").value;
+    if(!userMsg) return;
+
+    // Show user message
+    const userDiv = document.createElement("div");
+    userDiv.className = "user";
+    userDiv.textContent = "You: " + userMsg;
+    chat.appendChild(userDiv);
+
+    // Generate bot reply (simple smarter rules)
+    let botReply = "I don't know the answer to that, but I'm learning!";
+    const msg = userMsg.toLowerCase();
+
+    // Greetings
+    if(msg.includes("hello") || msg.includes("hi")) botReply = "Hello! How are you?";
+    else if(msg.includes("how are you")) botReply = "I'm doing great! Thanks for asking.";
+    else if(msg.includes("your name")) botReply = "I am SmartBot, your offline assistant.";
+    else if(msg.includes("bye")) botReply = "Goodbye! Have a wonderful day!";
+
+    // Programming questions
+    else if(msg.includes("python")) botReply = "Python is a popular programming language used for web, AI, and more.";
+    else if(msg.includes("html")) botReply = "HTML is the standard markup language for creating web pages.";
+    else if(msg.includes("javascript") || msg.includes("js")) botReply = "JavaScript is a scripting language for making websites interactive.";
+
+    // General knowledge questions
+    else if(msg.includes("capital of france")) botReply = "The capital of France is Paris.";
+    else if(msg.includes("earth")) botReply = "Earth is the third planet from the Sun in our solar system.";
+    else if(msg.includes("sun")) botReply = "The Sun is a star at the center of our solar system.";
+
+    // Show bot reply
+    const botDiv = document.createElement("div");
+    botDiv.className = "bot";
+    botDiv.textContent = "Bot: " + botReply;
+    chat.appendChild(botDiv);
+
+    // Scroll to bottom
+    chat.scrollTop = chat.scrollHeight;
+    document.getElementById("msg").value = "";
+  }
+</script>
+
+</body>
+</html>
