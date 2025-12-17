@@ -43,8 +43,6 @@ body {
     background: rgba(0,0,0,0.2);
     border-radius: 20px;
     margin: 20px 0;
-    display: flex;
-    flex-direction: column;
 }
 
 .message {
@@ -63,7 +61,6 @@ body {
 .ai {
     background: linear-gradient(135deg, #ffeb3b, #ff9800);
     color: #000;
-    align-self: flex-start;
     text-align: left;
 }
 
@@ -118,7 +115,6 @@ button.send {
         <button onclick="sendQuestion('Who are you?')">🤖 Who are you?</button>
         <button onclick="sendQuestion('What are your skills?')">💡 Skills</button>
         <button onclick="sendQuestion('Tell me about your projects')">📂 Projects</button>
-        <button onclick="sendQuestion('What is your goal?')">🎯 Goal</button>
     </div>
 
     <div id="input-container">
@@ -147,34 +143,6 @@ function speak(text) {
     }
 }
 
-/* 🧠 Human-like offline logic */
-function getReply(message) {
-    const msg = message.toLowerCase();
-
-    if (msg.includes("hi") || msg.includes("hello"))
-        return "Hi! Nice to meet you 😊";
-
-    if (msg.includes("who are you"))
-        return "I’m Shelten Eali Jack, a Computer Science student.";
-
-    if (msg.includes("skills"))
-        return "My skills include Python, Java, SQL, HTML, and CSS.";
-
-    if (msg.includes("project"))
-        return "I’ve worked on an AI chatbot, web applications, and coding challenges.";
-
-    if (msg.includes("goal"))
-        return "My goal is to become a successful software engineer.";
-
-    if (msg.includes("student"))
-        return "Yes, I’m currently studying Computer Science.";
-
-    if (msg.includes("help"))
-        return "I’m happy to help you with programming and tech questions.";
-
-    return "That sounds interesting. Tell me more!";
-}
-
 function sendQuestion(text) {
     const message = text || userInput.value.trim();
     if (!message) return;
@@ -182,11 +150,19 @@ function sendQuestion(text) {
     appendMessage("user", message);
     userInput.value = "";
 
-    setTimeout(() => {
-        const reply = getReply(message);
-        appendMessage("ai", reply);
-        speak(reply);
-    }, 400);
+    fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message })
+    })
+    .then(res => res.json())
+    .then(data => {
+        appendMessage("ai", data.reply);
+        speak(data.reply);
+    })
+    .catch(() => {
+        appendMessage("ai", "I’m unavailable right now.");
+    });
 }
 
 userInput.addEventListener("keydown", e => {
