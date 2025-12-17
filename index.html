@@ -173,32 +173,13 @@ function appendMessage(sender, text) {
     div.classList.add("message", sender);  
     div.textContent = `${sender === 'user' ? 'You' : 'AI Me'}: ${text}`;  
     chat.appendChild(div);  
-    chat.scrollTop = chat.scrollHeight;  
-}  
-function sendQuestion(text){
-  const msg=text || input.value;
-  if(!msg) return;
-
-  addMessage("user","You: "+msg);
-  input.value="";
-
-  fetch("https://chat-bot-pmlv.onrender.com/chat",{
+    chat.scrollTop = chat.scrollHeight; 
+    fetch("https://chat-bot-pmlv.onrender.com/chat",{
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body:JSON.stringify({message:msg})
   })
-  .then(res=>res.json())
-  .then(data=>{
-    addMessage("ai","AI: "+data.reply);
-  })
-  .catch(()=>{
-    addMessage("ai","AI is currently unavailable.");
-  });
-}
-
-input.addEventListener("keydown",e=>{
-  if(e.key==="Enter") sendQuestion();
-});
+}  
 function speak(text) {  
     if ('speechSynthesis' in window) {  
         const utterance = new SpeechSynthesisUtterance(text);  
